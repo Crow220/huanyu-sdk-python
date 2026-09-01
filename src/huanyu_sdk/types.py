@@ -12,7 +12,7 @@ class CreateOrderParams:
 
     FIELDS = (
         "order_type", "cny_amount", "payment_method", "customer_name",
-        "id_card", "mobile", "remark", "merchant_order_no",
+        "id_card", "mobile", "remark", "merchant_order_no", "callback_url",
     )
 
     data: dict = field(default_factory=dict)
