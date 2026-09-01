@@ -6,7 +6,9 @@ build-backend = "hatchling.build"
 name = "huanyu-sdk"
 version = "1.0.0"
 description = "PISCES 商户平台 Python SDK"
+readme = "README.md"
 license = {text = "MIT"}
+authors = [{name = "Crow220"}]
 requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -22,6 +24,10 @@ classifiers = [
 dependencies = [
     "requests>=2.25",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Crow220/huanyu-sdk-python"
+Repository = "https://github.com/Crow220/huanyu-sdk-python"
 
 [project.optional-dependencies]
 dev = [
