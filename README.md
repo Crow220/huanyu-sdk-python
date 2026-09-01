@@ -20,7 +20,7 @@ client = Client("你的api_key", "你的api_secret")
 order = client.create_order({
     "order_type": "1",                    # 1=买入 2=卖出
     "cny_amount": "100.00",
-    "merchant_order_no": "M20260831001",  # 商户内唯一，重复会被拒绝
+    # "merchant_order_no": "M20260831001",  # 选填：商户单号（商户内唯一），用于对账
     # "callback_url": "https://your.callback/receive",  # 选填：本单回调地址，未设置用商户默认
 })
 # order["result_status"] == "pending_identity" 时，引导用户访问 order["identity_url"] 补全身份信息
