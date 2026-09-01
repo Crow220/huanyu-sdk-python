@@ -1,7 +1,7 @@
 """Client 测试（responses 拦截 HTTP，零真实网络）。
 
 断言三层：
-1. 上行形态——嵌套参数括号记法展平、None/空串不上行、白名单过滤、通用参数注入；
+1. 上行形态——嵌套参数括号记法展平、None 不上行（空串照常上行）、白名单过滤、通用参数注入；
 2. 签名对齐——服务端视角把扁平表单重嵌套后用同一 Signature.sign 重算，必须与上行签名一致；
 3. 响应信封——code!=1 抛 HuanyuApiError，非 200 / 非 JSON / 缺 code 抛 RuntimeError。
 """
@@ -118,6 +118,38 @@ class TestCreateOrder:
             "bank": "工商银行",
             "sub_bank": "http测试支行/分行",
         }
+        assert sign(received, API_SECRET) == signature
+
+    @responses.activate
+    def test_nested_empty_string_leaf_roundtrip(self):
+        """嵌套空串叶子（sub_bank 未填）必须上行空值键：服务端重嵌套后 json_encode
+        保住该键，与客户端签名时的 JSON 形态一致。修复前展平跳过空串 → 服务端
+        重嵌套缺键 → 签名重算不一致 → 拒签。"""
+        responses.post(
+            f"{BASE}/merchant/createOrder",
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY003", "result_status": "success"}, "time": 1756684900},
+        )
+        payment_method = {
+            "bank": "工商银行",
+            "sub_bank": "",
+            "card_number": "6222020200112233445",
+            "real_name": "张三",
+        }
+        result = make_client().create_order({
+            "order_type": "2",
+            "cny_amount": "500.50",
+            "payment_method": payment_method,
+            "merchant_order_no": "M003",
+        })
+        assert result["result_status"] == "success"
+
+        form = _form_of(responses.calls[0].request)
+        # 空值扁平键必须确实上行（keep_blank_values 保留空值，可与“键缺失”区分）
+        assert form.get("payment_method[sub_bank]") == [""]
+
+        received = _renest(_flat_items(form))
+        signature = received.pop("signature")
+        assert received["payment_method"]["sub_bank"] == ""
         assert sign(received, API_SECRET) == signature
 
     @responses.activate

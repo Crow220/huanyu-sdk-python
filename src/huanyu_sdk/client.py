@@ -97,7 +97,8 @@ class Client:
         """递归展平为 PHP 表单括号记法：payment_method[bank]=ICBC。
 
         dict 按插入序递归（键序决定服务端重嵌套后的 JSON 化键序，是验签对齐的关键）；
-        list 按下标递归；None 与空串不上行（签名本就跳过它们，服务端无需收到）。
+        list 按下标递归；仅 None 不上行——顶层空串上行后服务端重算同样跳过（等价），
+        嵌套空串必须上行以保住 json_encode 键值形态（sign 的跳空值仅作用于顶层标量）。
         """
         if isinstance(value, dict):
             for key, sub in value.items():
@@ -105,7 +106,7 @@ class Client:
         elif isinstance(value, (list, tuple)):
             for index, sub in enumerate(value):
                 Client._flatten(sub, f"{prefix}[{index}]", out)
-        elif value is None or value == "":
+        elif value is None:
             return
         else:
             out[prefix] = str(value)
