@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "huanyu-sdk"
 version = "1.0.0"
-description = "寰宇（PISCES）商户平台 Python SDK"
+description = "PISCES商户平台 Python SDK"
 license = {text = "MIT"}
 requires-python = ">=3.9"
 classifiers = [

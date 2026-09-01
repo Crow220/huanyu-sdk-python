@@ -1,6 +1,6 @@
 # huanyu-sdk-python
 
-寰宇（PISCES）商户平台官方 Python SDK。
+PISCES商户平台官方 Python SDK。
 
 ## 安装
 
