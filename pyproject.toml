@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "huanyu-sdk"
+version = "1.0.0"
+description = "寰宇（PISCES）商户平台 Python SDK"
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.25",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "responses>=0.23",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/huanyu_sdk"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
