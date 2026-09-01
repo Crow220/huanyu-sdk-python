@@ -72,7 +72,7 @@ class TestCreateOrder:
         """乱序嵌套 payment_method：括号记法展平上行、无 dict-str 垃圾值、服务端重嵌套后重算签名一致。"""
         responses.post(
             f"{BASE}/merchant/createOrder",
-            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001", "result_status": "success"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001", "result_status": "success"}, "time": "1756684900"},
         )
         # 乱序 dict：插入序 ≠ 字典序，锁定“按插入序展平”（服务端重嵌套键序才能与签名 JSON 化一致）
         payment_method = {
@@ -127,7 +127,7 @@ class TestCreateOrder:
         重嵌套缺键 → 签名重算不一致 → 拒签。"""
         responses.post(
             f"{BASE}/merchant/createOrder",
-            json={"code": 1, "msg": "ok", "data": {"order_no": "HY003", "result_status": "success"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY003", "result_status": "success"}, "time": "1756684900"},
         )
         payment_method = {
             "bank": "工商银行",
@@ -157,7 +157,7 @@ class TestCreateOrder:
         """code=1 且 result_status=pending_identity：正常返回 data（含 identity_url）。"""
         responses.post(
             f"{BASE}/merchant/createOrder",
-            json={"code": 1, "msg": "ok", "data": {"result_status": "pending_identity", "identity_url": "https://verify.example.test/id"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"result_status": "pending_identity", "identity_url": "https://verify.example.test/id"}, "time": "1756684900"},
         )
         result = make_client().create_order({"order_type": 1, "cny_amount": "100.00"})
         assert result == {"result_status": "pending_identity", "identity_url": "https://verify.example.test/id"}
@@ -169,7 +169,7 @@ class TestErrorEnvelope:
         """code=0：抛 HuanyuApiError，api_code / str / api_time 逐项断言。"""
         responses.post(
             f"{BASE}/merchant/createOrder",
-            json={"code": 0, "msg": "商户单号已存在", "time": 1756684900},
+            json={"code": 0, "msg": "商户单号已存在", "time": "1756684900"},
         )
         try:
             make_client().create_order({"order_type": 1, "cny_amount": "100.00"})
@@ -225,7 +225,7 @@ class TestGetEndpoints:
         """GET：query 含 order_no 与 signature，白名单外字段过滤，服务端视角重算签名一致。"""
         responses.get(
             f"{BASE}/merchant/orderDetailApi",
-            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001", "status": "pending"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001", "status": "pending"}, "time": "1756684900"},
         )
         result = make_client().order_detail({"order_no": "HY001", "extra": "白名单外"})
         assert result["order_no"] == "HY001"
@@ -241,7 +241,7 @@ class TestGetEndpoints:
     def test_order_list_whitelist_and_get(self):
         responses.get(
             f"{BASE}/merchant/orderListApi",
-            json={"code": 1, "msg": "ok", "data": {"list": [], "total": 0, "page": 2, "limit": 50, "status_counts": {}}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"list": [], "total": 0, "page": 2, "limit": 50, "status_counts": {}}, "time": "1756684900"},
         )
         result = make_client().order_list({"page": 2, "limit": 50, "keyword": "白名单外"})
         assert result["total"] == 0
@@ -253,7 +253,7 @@ class TestGetEndpoints:
 
     @responses.activate
     def test_order_list_none_filters_defaults_to_empty(self):
-        responses.get(f"{BASE}/merchant/orderListApi", json={"code": 1, "msg": "ok", "data": {"total": 0}, "time": 1756684900})
+        responses.get(f"{BASE}/merchant/orderListApi", json={"code": 1, "msg": "ok", "data": {"total": 0}, "time": "1756684900"})
         assert make_client().order_list() == {"total": 0}
         query = _query_of(responses.calls[0].request)
         assert set(query) == {"api_key", "timestamp", "nonce", "signature"}
@@ -264,7 +264,7 @@ class TestPostEndpoints:
     def test_upload_payment_proof_sends_both_fields(self):
         responses.post(
             f"{BASE}/merchant/uploadPaymentProof",
-            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001"}, "time": "1756684900"},
         )
         result = make_client().upload_payment_proof("HY001", "https://cdn.example.test/p.jpg")
         assert result == {"order_no": "HY001"}
@@ -277,7 +277,7 @@ class TestPostEndpoints:
         """payment_proof=None：该键完全不上行（连空值都不传）。"""
         responses.post(
             f"{BASE}/merchant/confirmPayment",
-            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001"}, "time": "1756684900"},
         )
         result = make_client().confirm_payment("HY001")
         assert result == {"order_no": "HY001"}
@@ -289,7 +289,7 @@ class TestPostEndpoints:
     def test_confirm_payment_sends_proof_when_given(self):
         responses.post(
             f"{BASE}/merchant/confirmPayment",
-            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001"}, "time": 1756684900},
+            json={"code": 1, "msg": "ok", "data": {"order_no": "HY001"}, "time": "1756684900"},
         )
         make_client().confirm_payment("HY001", "https://cdn.example.test/proof.png")
         form = _form_of(responses.calls[0].request)
