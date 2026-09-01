@@ -4,6 +4,7 @@
 - common/vectors/signature_vectors.json：请求签名，7 例
 - common/vectors/callback_vectors.json：回调验签，2 例
 """
+import hashlib
 import json
 from pathlib import Path
 
@@ -98,7 +99,6 @@ class TestSignEdgeCases:
         # 空值判断用显式 is not None / != ""，0 与 False 必须参与签名
         # （对照 PHP $value !== '' && $value !== null）
         raw = "&".join(["a=0", "b=False"]) + "&api_secret=s"
-        import hashlib
 
         assert sign({"a": 0, "b": False}, "s") == hashlib.md5(
             raw.encode("utf-8")
@@ -106,8 +106,6 @@ class TestSignEdgeCases:
 
     def test_empty_params_still_signs_secret(self):
         # 全部参数为空：拼串为空后仍追加 &api_secret=（与 PHP rtrim 行为一致）
-        import hashlib
-
         assert sign({"remark": "", "extra": None}, "s") == hashlib.md5(
             b"&api_secret=s"
         ).hexdigest().upper()
